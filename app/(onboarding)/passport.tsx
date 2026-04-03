@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { router } from 'expo-router';
 import ScreenContainer from '../../components/ScreenContainer';
 import GlassCard from '../../components/GlassCard';
 import PassportScene from '../../components/scenes/PassportScene';
@@ -57,6 +58,7 @@ export default function PassportScreen() {
 
   const handleStampComplete = () => {
     completeOnboarding();
+    router.replace('/(tabs)');
   };
 
   const genderOptions: { value: Gender; label: string }[] = [
@@ -133,10 +135,7 @@ export default function PassportScreen() {
                       <Pressable
                         key={opt.value}
                         onPress={() => setGender(opt.value)}
-                        style={[
-                          styles.genderPill,
-                          gender === opt.value && styles.genderPillActive,
-                        ]}
+                        style={[styles.genderPill, gender === opt.value && styles.genderPillActive]}
                       >
                         <Text
                           style={[

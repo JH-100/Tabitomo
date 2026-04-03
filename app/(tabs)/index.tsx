@@ -1,16 +1,25 @@
 import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { router } from 'expo-router';
 import ScreenContainer from '../../components/ScreenContainer';
 import GlassCard from '../../components/GlassCard';
 import Avatar3D from '../../components/Avatar3D';
 import JourneyMap from '../../components/JourneyMap';
 import Colors from '../../constants/Colors';
 import TRAVEL_STAGES from '../../constants/TravelStages';
+import HIRAGANA_LESSONS from '../../constants/LessonData';
+import KATAKANA_LESSONS from '../../constants/KatakanaData';
 import { useUserStore } from '../../store/useUserStore';
 
+const ALL_LESSONS = [...HIRAGANA_LESSONS, ...KATAKANA_LESSONS];
+
 export default function HomeScreen() {
-  const { currentLevel, streak, profile } = useUserStore();
+  const { currentLevel, streak, profile, lessonsCompleted } = useUserStore();
   const stage = TRAVEL_STAGES[currentLevel] ?? TRAVEL_STAGES[0];
   const next = TRAVEL_STAGES[currentLevel + 1];
+
+  // 다음 미완료 레슨 찾기 (히라가나 → 카타카나 순)
+  const nextLesson = ALL_LESSONS.find((l) => !lessonsCompleted.includes(l.id));
+  const hasCompletedAny = lessonsCompleted.length > 0;
 
   return (
     <ScreenContainer>
@@ -18,7 +27,9 @@ export default function HomeScreen() {
         {/* Header - calm, minimal */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.hi}>{profile?.displayName ? `${profile.displayName}さん` : 'おかえり'}</Text>
+            <Text style={styles.hi}>
+              {profile?.displayName ? `${profile.displayName}さん` : 'おかえり'}
+            </Text>
             <Text style={styles.hiSub}>오늘도 여행 준비를 계속해볼까요?</Text>
           </View>
           <GlassCard depth={1} noPadding style={styles.streak}>
@@ -48,20 +59,35 @@ export default function HomeScreen() {
 
         {/* Quick actions - tactile buttons */}
         <View style={styles.actions}>
-          <GlassCard depth={2} style={styles.actionBtn} onPress={() => {}}>
+          <GlassCard
+            depth={2}
+            style={styles.actionBtn}
+            onPress={() => {
+              if (nextLesson) router.push(`/lesson/${nextLesson.id}`);
+              else router.push('/(tabs)/lessons');
+            }}
+          >
             <View style={[styles.actionGlow, { backgroundColor: Colors.primaryMuted }]} />
             <Text style={styles.actionEmoji}>📖</Text>
-            <Text style={styles.actionLabel}>오늘의 학습</Text>
+            <Text style={styles.actionLabel}>{nextLesson ? '다음 레슨' : '레슨 목록'}</Text>
           </GlassCard>
-          <GlassCard depth={2} style={styles.actionBtn} onPress={() => {}}>
+          <GlassCard
+            depth={hasCompletedAny ? 2 : 0}
+            style={[styles.actionBtn, !hasCompletedAny && styles.actionDisabled]}
+            onPress={hasCompletedAny ? () => router.push('/practice/quiz') : undefined}
+          >
             <View style={[styles.actionGlow, { backgroundColor: Colors.blueMuted }]} />
-            <Text style={styles.actionEmoji}>💬</Text>
-            <Text style={styles.actionLabel}>회화 연습</Text>
-          </GlassCard>
-          <GlassCard depth={2} style={styles.actionBtn} onPress={() => {}}>
-            <View style={[styles.actionGlow, { backgroundColor: Colors.purpleMuted }]} />
             <Text style={styles.actionEmoji}>🎯</Text>
             <Text style={styles.actionLabel}>퀴즈</Text>
+          </GlassCard>
+          <GlassCard
+            depth={hasCompletedAny ? 2 : 0}
+            style={[styles.actionBtn, !hasCompletedAny && styles.actionDisabled]}
+            onPress={hasCompletedAny ? () => router.push('/practice/matching') : undefined}
+          >
+            <View style={[styles.actionGlow, { backgroundColor: Colors.purpleMuted }]} />
+            <Text style={styles.actionEmoji}>🃏</Text>
+            <Text style={styles.actionLabel}>매칭 게임</Text>
           </GlassCard>
         </View>
 
@@ -204,6 +230,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.text,
     textAlign: 'center',
+  },
+  actionDisabled: {
+    opacity: 0.4,
   },
 
   // Section

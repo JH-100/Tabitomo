@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View, Pressable, Alert } from 'react-native';
+import { router } from 'expo-router';
 import ScreenContainer from '../../components/ScreenContainer';
 import GlassCard from '../../components/GlassCard';
 import Avatar3D from '../../components/Avatar3D';
@@ -9,8 +10,8 @@ export default function ProfileScreen() {
   const { profile, currentLevel, streak, xp, reset } = useUserStore();
 
   const handleLogout = () => {
-    // On web, Alert.alert doesn't work - just reset
     reset();
+    router.replace('/(onboarding)/welcome');
   };
 
   return (
@@ -23,9 +24,7 @@ export default function ProfileScreen() {
       <GlassCard depth={3} style={styles.profileCard}>
         <Avatar3D size={120} showGlow />
         <Text style={styles.name}>{profile?.displayName ?? 'Traveler'}</Text>
-        {profile?.birthdate && (
-          <Text style={styles.bio}>{profile.birthdate}</Text>
-        )}
+        {profile?.birthdate && <Text style={styles.bio}>{profile.birthdate}</Text>}
         <Text style={styles.bio}>일본 여행을 준비하는 중...</Text>
 
         <View style={styles.stats}>

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -27,6 +27,9 @@ export default function PassportScene({
   isStamped = false,
   onStampComplete,
 }: PassportSceneProps) {
+  const onStampCompleteRef = useRef(onStampComplete);
+  onStampCompleteRef.current = onStampComplete;
+
   // Entrance animation
   const flipY = useSharedValue(90);
   const opacity = useSharedValue(0);
@@ -46,43 +49,39 @@ export default function PassportScene({
   useEffect(() => {
     if (isStamped) {
       stampOpacity.value = withDelay(200, withTiming(1, { duration: 100 }));
-      stampScale.value = withDelay(200,
+      stampScale.value = withDelay(
+        200,
         withSequence(
           withSpring(1.3, { damping: 6, stiffness: 200 }),
-          withSpring(1, { damping: 10, stiffness: 150 }),
+          withSpring(1, { damping: 10, stiffness: 150 })
         )
       );
-      stampRotate.value = withDelay(200,
-        withSpring(-5, { damping: 8, stiffness: 120 })
-      );
+      stampRotate.value = withDelay(200, withSpring(-5, { damping: 8, stiffness: 120 }));
 
       // Callback after animation
-      const timer = setTimeout(() => onStampComplete?.(), 1200);
+      const timer = setTimeout(() => onStampCompleteRef.current?.(), 1200);
       return () => clearTimeout(timer);
     }
   }, [isStamped]);
 
   const passportStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [
-      { perspective: 1000 },
-      { rotateY: `${flipY.value}deg` },
-      { scale: scale.value },
-    ],
+    transform: [{ perspective: 1000 }, { rotateY: `${flipY.value}deg` }, { scale: scale.value }],
   }));
 
   const stampStyle = useAnimatedStyle(() => ({
     opacity: stampOpacity.value,
-    transform: [
-      { scale: stampScale.value },
-      { rotate: `${stampRotate.value}deg` },
-    ],
+    transform: [{ scale: stampScale.value }, { rotate: `${stampRotate.value}deg` }],
   }));
 
   const genderLabel =
-    gender === 'male' ? '남 / M' :
-    gender === 'female' ? '여 / F' :
-    gender === 'other' ? '기타 / X' : '';
+    gender === 'male'
+      ? '남 / M'
+      : gender === 'female'
+        ? '여 / F'
+        : gender === 'other'
+          ? '기타 / X'
+          : '';
 
   return (
     <Animated.View style={[styles.passport, passportStyle]}>
@@ -115,7 +114,8 @@ export default function PassportScene({
         {/* MRZ-like bottom strip */}
         <View style={styles.mrz}>
           <Text style={styles.mrzText}>
-            {'P<KOR' + (displayName ? `<${displayName.toUpperCase()}` : '<<<<<<<<<<').padEnd(30, '<')}
+            {'P<KOR' +
+              (displayName ? `<${displayName.toUpperCase()}` : '<<<<<<<<<<').padEnd(30, '<')}
           </Text>
         </View>
 
@@ -135,9 +135,7 @@ function PassportField({ label, value }: { label: string; value?: string }) {
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
-      <Text style={[styles.fieldValue, !value && styles.fieldEmpty]}>
-        {value || '미입력'}
-      </Text>
+      <Text style={[styles.fieldValue, !value && styles.fieldEmpty]}>{value || '미입력'}</Text>
       <View style={styles.fieldLine} />
     </View>
   );

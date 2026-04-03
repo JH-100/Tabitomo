@@ -8,3 +8,19 @@ dist/
 *.mobileprovision
 *.orig.*
 web-build/
+
+# Environment variables
+.env
+.env.*
+.env.local
+.env.production
+
+# Coverage
+coverage/
+
+# Temporary files
+*.tmp.*
+
+# OS
+.DS_Store
+Thumbs.db
